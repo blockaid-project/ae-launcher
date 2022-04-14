@@ -23,8 +23,13 @@ fi
 
 source "$CREDENTIALS_FILE"
 
-params=()
-[[ -v TEST_RUN ]] && params+=("-e" "test_run=1")
+if [[ -v TEST_RUN ]]
+then
+    params=("-e" "test_run=true")
+else
+    params=("-e" "test_run=false")
+fi
+
 ansible-playbook -f 6 "${params[@]}" launch.yml
 
 ./plot/produce_plot_comparisons.sh
