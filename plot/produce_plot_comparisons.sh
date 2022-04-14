@@ -8,4 +8,3 @@ cd /data
 /app/experiments/plot/make_plt_table.py ./experiments > /data/plt_table.tex
 
 pdflatex /app/plot/all_plots.tex
-
