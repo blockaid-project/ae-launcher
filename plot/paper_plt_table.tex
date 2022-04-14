@@ -1,0 +1,25 @@
+\begin{tabular}{lrrrr}
+\toprule
+& \multicolumn{4}{c}{\textbf{Page Load Time} (median / P95, default unit: ms)} \\
+\cmidrule(lr){2-5}
+& Original & Modified & Cached & No cache \\ \midrule
+\textbf{diaspora*}\\
+    \quad{}Simple post & 171 / 177 & 171 / 178 & 177 / 185 & \SI{2.5}{s} / \SI{2.6}{s} \\ % & 2532 / 2583 \\
+    \quad{}Complex post & 171 / 179 & 171 / 179 & 178 / 187 & \SI{2.6}{s} / \SI{2.7}{s} \\ % 2606 / 2688 \\
+    \quad{}Prohibited post & 34 / 36 & 34 / 36 & 35 / 38 & 259 / 278 \\
+    \quad{}Conversation & 252 / 258 & 254 / 260 & 260 / 267 & \SI{2.0}{s} / \SI{2.1}{s} \\ % & 2006 / 2060 \\
+    \quad{}Profile & 140 / 144 & 142 / 146 & 148 / 154 & \SI{1.3}{s} / \SI{1.3}{s} \\ % 1281 / 1322 \\
+\textbf{Spree}\\
+    \quad{}Account & 72 / 79 & 74 / 82 & 77 / 84 & 584 / 628 \\
+    \quad{}Available item & 121 / 138 & 114 / 164 & 121 / 163 & \SI{4.3}{s} / \SI{4.4}{s} \\ % & 4326 / 4419 \\
+    \quad{}Unavailable item & 20 / 21 & 21 / 23 & 22 / 24 & 348 / 371 \\
+    \quad{}Cart & 115 / 129 & 116 / 131 & 124 / 139 & \SI{7.6}{s} / \SI{7.6}{s} \\ % 7555 / 7627 \\
+    \quad{}Order & 158 / 168 & 160 / 171 & 172 / 181 & \SI{39}{s} / \SI{39}{s} \\ % & \num{38751} / \num{38889} \\
+\textbf{Autolab}\\
+    \quad{}Homepage & 53 / 56 & 56 / 60 & 60 / 62 & \SI{1.4}{s} / \SI{1.5}{s} \\ % & 1430 / 1511 \\
+    \quad{}Course & 83 / 96 & 82 / 92 & 84 / 92 & \SI{3.9}{s} / \SI{4.1}{s} \\ % 3908 / 4058 \\
+    \quad{}Assignment & 90 / 103 & 93 / 103 & 95 / 103 & \SI{3.5}{s} / \SI{3.6}{s} \\ % & 3519 / 3637 \\
+    \quad{}Submission & 19 / 21 & 22 / 25 & 24 / 26 & \SI{1.1}{s} / \SI{1.1}{s} \\ % 1085 / 1130 \\
+    \quad{}Gradesheet & 450 / 468 & 458 / 474 & 481 / 496 & \SI{72}{s} / \SI{73}{s} \\ % \num{71716} / \num{72525} \\
+\bottomrule
+\end{tabular}

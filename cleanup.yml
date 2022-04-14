@@ -1,0 +1,48 @@
+---
+- name: Clean up
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Terminate EC2 instances
+      amazon.aws.ec2_instance:
+        state: absent
+        filters:
+          "tag:Blockaid": "yes"
+
+    - name: Delete security group
+      amazon.aws.ec2_group:
+        name: blockaid-ae
+        state: absent
+
+    # Adapted from: https://github.com/mateothegreat/aws-vpc-delete/.
+    - name: Gather VPC info
+      amazon.aws.ec2_vpc_net_info:
+        filters:
+          "tag:Name": blockaid-ae
+      register: vpc_info
+
+    - name: Delete internet gateways
+      ec2_vpc_igw:
+        vpc_id: "{{ item.vpc_id }}"
+        state: "absent"
+      with_items: "{{ vpc_info.vpcs }}"
+
+    - name: Query for any existing subnet(s)
+      ec2_vpc_subnet_info:
+        filters:
+          vpc-id: "{{ item.vpc_id }}"
+      register: subnet_info
+      with_items: "{{ vpc_info.vpcs }}"
+
+    - name: Delete subnets
+      ec2_vpc_subnet:
+        vpc_id: "{{ item.vpc_id }}"
+        cidr: "{{ item.cidr_block }}"
+        state: "absent"
+      with_items: "{{ subnet_info.results | map(attribute='subnets') | flatten }}"
+
+    - name: Delete VPC
+      amazon.aws.ec2_vpc_net:
+        name: blockaid-ae
+        cidr_block: 10.10.0.0/16
+        state: absent

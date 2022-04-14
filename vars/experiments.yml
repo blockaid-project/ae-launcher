@@ -1,0 +1,4 @@
+---
+measure_kinds: ['plt', 'fetch']
+app_names: ['diaspora', 'spree', 'autolab']
+

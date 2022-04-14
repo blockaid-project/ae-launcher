@@ -1,0 +1,168 @@
+---
+- name: Create EC2 instances
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create a VPC
+      amazon.aws.ec2_vpc_net:
+        name: blockaid-ae
+        cidr_block: 10.10.0.0/16
+      register: vpc_output
+
+    - name: Create a subnet
+      amazon.aws.ec2_vpc_subnet:
+        state: present
+        vpc_id: "{{ vpc_output.vpc.id }}"
+        cidr: 10.10.0.0/16
+        tags:
+          Name: Blockaid AE Subnet
+      register: subnet_output
+
+    - name: Create Internet gateway
+      amazon.aws.ec2_vpc_igw:
+        vpc_id: "{{ vpc_output.vpc.id }}"
+        tags:
+          Name: Blockaid AE Internet gateway
+        state: present
+      register: igw
+
+    - name: Lookup route tables
+      amazon.aws.ec2_vpc_route_table_info:
+        filters:
+          vpc-id: "{{ vpc_output.vpc.id }}"
+      register: rts
+
+    - name: Set up public subnet route table
+      amazon.aws.ec2_vpc_route_table:
+        lookup: id
+        route_table_id: "{{ rts.route_tables[0].id }}"
+        vpc_id: "{{ vpc_output.vpc.id }}"
+        subnets:
+          - "{{ subnet_output.subnet.id }}"
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ igw.gateway_id }}"
+      register: public_route_table
+
+    - name: Create a security group
+      amazon.aws.ec2_group:
+        name: blockaid-ae
+        description: An open-to-public security group for Blockaid artifact evaluation
+        vpc_id: "{{vpc_output.vpc.id}}"
+        rules:
+          - proto: tcp
+            ports:
+              - 22
+            cidr_ip: 0.0.0.0/0
+            rule_desc: allow all on port 22 (ssh)
+      register: group_output
+
+    - name: Include experiment description
+      include_vars: vars/experiments.yml
+
+    - name: Create EC2 instances
+      amazon.aws.ec2_instance:
+        instance_type: c4.8xlarge
+        image_id: ami-028f98711eb284b18
+        vpc_subnet_id: "{{ subnet_output.subnet.id }}"
+        security_group: "{{ group_output.group_id }}"
+        name: "blockaid-ae-{{ item[0] }}-{{ item[1] }}"
+        tags:
+          Blockaid: "yes"
+          MeasureKind: "{{ item[0] }}"
+          MeasureApp: "{{ item[1] }}"
+          IsDriver: "{{ 'yes' if idx == 0 else 'no' }}"
+        network:
+          #assign_public_ip: "{{ idx == 0 | bool }}"
+          assign_public_ip: yes
+          private_ip_address: "10.10.1.{{ idx }}"
+        user_data: "{{ item[0] }} {{ item[1] }}\n"
+        wait: yes
+      loop: "{{ measure_kinds | product(app_names) | list }}"
+      loop_control:
+        index_var: idx
+      register: ec2
+
+    - name: Gather instance IDs into a variable
+      set_fact:
+        instance_ids: "{{ ec2.results | map(attribute='instances') | flatten | map(attribute='instance_id') }}"
+
+    - assert:
+        that: "instance_ids|length == measure_kinds|length * app_names|length"
+
+    - name: Fetch EC2 instance info (check for public IPs)
+      amazon.aws.ec2_instance_info:
+        instance_ids: "{{ instance_ids }}"
+      register: all_info
+      until: all_info.instances | selectattr("public_ip_address", "undefined") | list | length == 0
+      retries: 20
+      delay: 10
+
+    - name: Add all EC2 hosts
+      add_host:
+        name: "{{ item.public_ip_address }}"
+        groups: ae_instances
+      loop: "{{ all_info.instances }}"
+
+    - name: Information
+      ansible.builtin.debug:
+        msg: "This is a {{ 'TEST RUN' if test_run else 'FULL RUN' }}."
+
+- name: Wait for instances to be ready
+  hosts: ae_instances
+  gather_facts: no
+  tasks:
+    - name: Wait 600 seconds for target connection to become reachable/usable
+      wait_for_connection:
+
+- name: Run experiments
+  hosts: ae_instances
+  vars:
+    blockaid_dir: /home/ubuntu/privacy_proxy
+    experiments_dir: /home/ubuntu/experiments
+    output_dir: "/home/ubuntu/ae_data{{ '_test_run' if test_run else '' }}"
+    local_output_dir: "/data/experiments"
+  tasks:
+    - name: Update experiment scripts
+      ansible.builtin.git:
+        repo: https://github.com/blockaid-project/experiments.git
+        dest: "{{ experiments_dir }}"
+        version: main
+        update: yes
+
+    - name: Update Blockaid
+      ansible.builtin.git:
+        repo: https://github.com/blockaid-project/blockaid.git
+        dest: "{{ blockaid_dir }}"
+        version: main
+        update: yes
+      register: update_blockaid
+
+    - name: Build Blockaid
+      ansible.builtin.shell: ". /home/ubuntu/.profile; mvn compile assembly:single"
+      args:
+        chdir: "{{ blockaid_dir }}"
+      when: update_blockaid.changed
+
+    - name: Run experiments
+      ansible.builtin.shell: "{{ 'export TEST_RUN=1;' if test_run else '' }} ./run_from_user_data.sh {{ output_dir }}"
+      args:
+        chdir: "{{ experiments_dir }}"
+      async: "{{ 60 * 60 }}"  # Timeout in seconds.
+      poll: 60  # Polling interval in seconds.
+
+    - name: Create local directory
+      ansible.builtin.file:
+        path: "{{ local_output_dir }}"
+        state: directory
+      delegate_to: localhost
+
+    - name: Fetch data
+      ansible.posix.synchronize:
+        mode: pull
+        src: "{{ output_dir }}/"
+        dest: "{{ local_output_dir }}/"
+
+- name: Clean up
+  import_playbook: cleanup.yml
+
