@@ -1,9 +1,10 @@
 \documentclass{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{booktabs}
+\usepackage{float}
 \usepackage{graphicx}
 \usepackage{caption}
-\title{Artifact Evaluation: Embargo: Data Access Policy Enforcement for Web Applications}
+\title{\textbf{Artifact Evaluation}\\Blockaid: Data Access Policy Enforcement for Web Applications}
 \author{}
 \date{}
 \begin{document}
@@ -11,24 +12,35 @@
 
 \begin{figure}[H]\centering
     \includegraphics[width=\textwidth]{/data/fetch.pdf}
-    \caption*{\bf Figure~5 (generated).}
+    \caption*{\bf Figure~5 (generated)}
 \end{figure}
 
 \begin{figure}[H]\centering
     \includegraphics[width=\textwidth]{/app/plot/paper_fetch.pdf}
-    \caption*{Figure~5 (from the paper).}
+    \caption*{Figure~5 (from the paper)}
 \end{figure}
 
 \begin{table}[H]
-\caption*{\bf Table~2 (generated).}
+\caption*{\bf Table~2 (generated)}
 \small\centering
 \input{/data/plt_table.tex}
 \end{table}
 
 \begin{table}[H]
-\caption*{Table~2 (from the paper, abridged).}
+\caption*{Table~2 (from the paper, abridged)}
 \small\centering
 \input{/app/plot/paper_plt_table.tex}
 \end{table}
+
+\begin{figure}[H]\centering
+    \begin{minipage}{.48\textwidth}
+        \includegraphics[width=\textwidth]{/data/winners.pdf}
+        \caption*{\bf Figure~7 (generated)}
+    \end{minipage}\hfill%
+    \begin{minipage}{.48\textwidth}
+        \includegraphics[width=\textwidth]{/app/plot/paper_winners.pdf}
+        \caption*{Figure~7 (from the paper)}
+    \end{minipage}
+\end{figure}
 
 \end{document}

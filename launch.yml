@@ -106,7 +106,7 @@
 
     - name: Information
       ansible.builtin.debug:
-        msg: "This is a {{ 'TEST RUN' if test_run else 'FULL RUN' }}."
+        msg: "This is a {{ 'TEST RUN' if test_run is defined else 'FULL RUN' }}."
 
 - name: Wait for instances to be ready
   hosts: ae_instances
@@ -120,7 +120,7 @@
   vars:
     blockaid_dir: /home/ubuntu/privacy_proxy
     experiments_dir: /home/ubuntu/experiments
-    output_dir: "/home/ubuntu/ae_data{{ '_test_run' if test_run else '' }}"
+    output_dir: "/home/ubuntu/ae_data{{ '_test_run' if test_run is defined else '' }}"
     local_output_dir: "/data/experiments"
   tasks:
     - name: Update experiment scripts
@@ -145,7 +145,7 @@
       when: update_blockaid.changed
 
     - name: Run experiments
-      ansible.builtin.shell: "{{ 'export TEST_RUN=1;' if test_run else '' }} ./run_from_user_data.sh {{ output_dir }}"
+      ansible.builtin.shell: "{{ 'export TEST_RUN=1;' if test_run is defined else '' }} ./run_from_user_data.sh {{ output_dir }}"
       args:
         chdir: "{{ experiments_dir }}"
       async: "{{ 60 * 60 }}"  # Timeout in seconds.
