@@ -63,7 +63,7 @@
     - name: Create EC2 instances
       amazon.aws.ec2_instance:
         instance_type: c4.8xlarge
-        image_id: ami-01457e9b6b7cdee4e
+        image_id: "{{ ami_id }}"  # Passed in from command line.
         vpc_subnet_id: "{{ subnet_output.subnet.id }}"
         security_group: "{{ group_output.group_id }}"
         name: "blockaid-ae-{{ item[0] }}-{{ item[1] }}"
