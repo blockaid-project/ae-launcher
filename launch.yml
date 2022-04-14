@@ -63,7 +63,7 @@
     - name: Create EC2 instances
       amazon.aws.ec2_instance:
         instance_type: c4.8xlarge
-        image_id: ami-028f98711eb284b18
+        image_id: ami-01457e9b6b7cdee4e
         vpc_subnet_id: "{{ subnet_output.subnet.id }}"
         security_group: "{{ group_output.group_id }}"
         name: "blockaid-ae-{{ item[0] }}-{{ item[1] }}"
@@ -148,7 +148,7 @@
       ansible.builtin.shell: "{{ 'export TEST_RUN=1;' if test_run is defined else '' }} ./run_from_user_data.sh {{ output_dir }}"
       args:
         chdir: "{{ experiments_dir }}"
-      async: "{{ 60 * 60 }}"  # Timeout in seconds.
+      async: "{{ 48 * 60 * 60 }}"  # Timeout in seconds -- 2 days.
       poll: 60  # Polling interval in seconds.
 
     - name: Create local directory
