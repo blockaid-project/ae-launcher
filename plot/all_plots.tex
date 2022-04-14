@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage[margin=1in]{geometry}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{caption}
@@ -8,24 +9,24 @@
 \begin{document}
 \maketitle
 
-\begin{figure}\centering
+\begin{figure}[H]\centering
     \includegraphics[width=\textwidth]{/data/fetch.pdf}
-    \caption*{Figure~5: Generated.}
+    \caption*{\bf Figure~5 (generated).}
 \end{figure}
 
-\begin{figure}\centering
+\begin{figure}[H]\centering
     \includegraphics[width=\textwidth]{/app/plot/paper_fetch.pdf}
-    \caption*{Figure~5: From the paper.}
+    \caption*{Figure~5 (from the paper).}
 \end{figure}
 
-\begin{table}
-\caption*{Table~2: Generated.}
+\begin{table}[H]
+\caption*{\bf Table~2 (generated).}
 \small\centering
 \input{/data/plt_table.tex}
 \end{table}
 
-\begin{table}
-\caption*{Table~2: From the paper (abridged).}
+\begin{table}[H]
+\caption*{Table~2 (from the paper, abridged).}
 \small\centering
 \input{/app/plot/paper_plt_table.tex}
 \end{table}
