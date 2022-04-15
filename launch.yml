@@ -151,7 +151,7 @@
       async: "{{ 48 * 60 * 60 }}"  # Timeout in seconds -- 2 days.
       poll: 60  # Polling interval in seconds.
 
-    - name: Create local directory
+    - name: Create local output directory
       ansible.builtin.file:
         path: "{{ local_output_dir }}"
         state: directory
@@ -162,6 +162,12 @@
         mode: pull
         src: "{{ output_dir }}/"
         dest: "{{ local_output_dir }}/"
+
+    - name: Write down the run mode
+      ansible.builtin.copy:
+        content: "{{ run_mode }}"
+        dest: "{{ local_output_dir }}/mode.txt"
+      delegate_to: localhost
 
 - name: Clean up
   import_playbook: cleanup.yml
