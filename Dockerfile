@@ -1,7 +1,9 @@
 FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential r-base python3-dev python3-pip libcairo2-dev texlive ssh rsync git nano
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends build-essential r-base libcairo2-dev texlive ssh rsync git nano
+RUN apt-get install -y --no-install-recommends python3-dev python3-pip
 
 WORKDIR /app
 COPY requirements.txt .
