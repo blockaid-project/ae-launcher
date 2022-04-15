@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-CREDENTIALS_FILE=".credentials.sh"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "$SCRIPT_DIR"
 

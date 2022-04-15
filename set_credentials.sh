@@ -1,3 +1,5 @@
+CREDENTIALS_FILE=".credentials.sh"
+
 if [ ! -f "$CREDENTIALS_FILE" ]
 then
   echo "AWS credentials not found..."
@@ -14,5 +16,7 @@ export AWS_ACCESS_KEY=${access_key_id}
 export AWS_SECRET_KEY=${secret_access_key}
 export AMI_ID=${ami_id}
 EOF
+
+  echo "Credentials written to $CREDENTIALS_FILE."
 fi
 source "$CREDENTIALS_FILE"
