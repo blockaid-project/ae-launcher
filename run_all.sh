@@ -11,5 +11,6 @@ git pull public main --ff-only
 source set_credentials.sh
 
 ansible-playbook -f 6 -e "ami_id=$AMI_ID" -e "run_mode=$run_mode" launch.yml
+printf "%s" "$run_mode" > /data/mode.txt
 
 ./plot/produce_plot_comparisons.sh

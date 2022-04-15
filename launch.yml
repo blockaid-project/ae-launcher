@@ -163,12 +163,6 @@
         src: "{{ output_dir }}/"
         dest: "{{ local_output_dir }}/"
 
-    - name: Write down the run mode
-      ansible.builtin.copy:
-        content: "{{ run_mode }}"
-        dest: "{{ local_output_dir }}/mode.txt"
-      delegate_to: localhost
-
 - name: Clean up
   import_playbook: cleanup.yml
 
