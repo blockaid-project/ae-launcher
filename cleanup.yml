@@ -9,6 +9,9 @@
         filters:
           "tag:Blockaid": "yes"
 
+    - meta: end_play
+      when: terminate_ec2_only is defined
+
     - name: Delete security group
       amazon.aws.ec2_group:
         name: blockaid-ae

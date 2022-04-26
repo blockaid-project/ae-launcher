@@ -60,6 +60,10 @@
     - name: Include experiment description
       include_vars: vars/experiments.yml
 
+    - name: Compute the experiment tasks to run in this batch
+      set_fact:
+        measure_tasks: "{{ (measure_kinds | product(app_names) | batch(parallel) | list)[batch_idx] }}"
+
     - name: Create EC2 instances
       amazon.aws.ec2_instance:
         instance_type: c4.8xlarge
@@ -71,16 +75,11 @@
           Blockaid: "yes"
           MeasureKind: "{{ item[0] }}"
           MeasureApp: "{{ item[1] }}"
-          IsDriver: "{{ 'yes' if idx == 0 else 'no' }}"
         network:
-          #assign_public_ip: "{{ idx == 0 | bool }}"
           assign_public_ip: yes
-          private_ip_address: "10.10.1.{{ idx }}"
         user_data: "{{ item[0] }} {{ item[1] }}\n"
         wait: yes
-      loop: "{{ measure_kinds | product(app_names) | list }}"
-      loop_control:
-        index_var: idx
+      loop: "{{ measure_tasks }}"
       register: ec2
 
     - name: Gather instance IDs into a variable
@@ -88,7 +87,7 @@
         instance_ids: "{{ ec2.results | map(attribute='instances') | flatten | map(attribute='instance_id') }}"
 
     - assert:
-        that: "instance_ids|length == measure_kinds|length * app_names|length"
+        that: "instance_ids|length == measure_tasks|length"
 
     - name: Fetch EC2 instance info (check for public IPs)
       amazon.aws.ec2_instance_info:
@@ -106,7 +105,9 @@
 
     - name: Information
       ansible.builtin.debug:
-        msg: "This is a {{ run_mode|upper }} run."
+        msg:
+          - "This is a {{ run_mode|upper }} run."
+          - "Tasks in this batch: {{ measure_tasks }}."
 
 - name: Wait for instances to be ready
   hosts: ae_instances
@@ -165,4 +166,6 @@
 
 - name: Clean up
   import_playbook: cleanup.yml
+  vars:
+    terminate_ec2_only: yes
 

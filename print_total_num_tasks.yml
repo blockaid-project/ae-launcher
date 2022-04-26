@@ -1,0 +1,11 @@
+---
+- name: Print the total number of tasks
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Include experiment description
+      include_vars: vars/experiments.yml
+
+    - name: Information
+      ansible.builtin.debug:
+        msg: "total={{ measure_kinds | product(app_names) | list | length }}"
