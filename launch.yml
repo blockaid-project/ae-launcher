@@ -150,7 +150,7 @@
       args:
         chdir: "{{ experiments_dir }}"
       async: "{{ 48 * 60 * 60 }}"  # Timeout in seconds -- 2 days.
-      poll: 60  # Polling interval in seconds.
+      poll: 47  # Polling interval in seconds.
 
     - name: Create local output directory
       ansible.builtin.file:
