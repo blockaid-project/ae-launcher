@@ -128,14 +128,14 @@
       ansible.builtin.git:
         repo: https://github.com/blockaid-project/experiments.git
         dest: "{{ experiments_dir }}"
-        version: main
+        version: osdi22ae
         update: yes
 
     - name: Update Blockaid
       ansible.builtin.git:
         repo: https://github.com/blockaid-project/blockaid.git
         dest: "{{ blockaid_dir }}"
-        version: main
+        version: osdi22ae
         update: yes
       register: update_blockaid
 
@@ -144,6 +144,12 @@
       args:
         chdir: "{{ blockaid_dir }}"
       when: update_blockaid.changed
+
+    - name: Disable time sync
+      ansible.builtin.shell: "sudo systemctl disable systemd-timesyncd; sudo systemctl stop systemd-timesyncd; sudo timedatectl set-ntp false"
+
+    - name: Set date time  # Autolab policy depends on current time.
+      ansible.builtin.shell: "sudo date --set '15 Apr 2022 15:00:00'"
 
     - name: Run experiments
       ansible.builtin.shell: "export RUN_MODE={{ run_mode }}; ./run_from_user_data.sh {{ output_dir }}"
